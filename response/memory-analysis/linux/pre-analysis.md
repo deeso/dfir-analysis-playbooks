@@ -54,9 +54,15 @@ echo "deb-src http://archive.ubuntu.com/ubuntu $(lsb_release -cs)-updates main r
 sudo apt-get update
 sudo apt -y source linux-image-$(uname -r) 
 
+# packages for building kernel
+sudo apt install install git build-essential kernel-package fakeroot libncurses5-dev libssl-dev ccache
 
 # or clone kernel source
 git clone git://kernel.ubuntu.com/ubuntu/ubuntu-$(lsb_release -cs).git $KERNEL_SRC
+
+cp TARGET_CONFIG ubuntu-$(lsb_release -cs)/.config
+yes '' | make oldconfig
+
 
 cd ubuntu-$(lsb_release -cs)
 chmod a+x debian/rules

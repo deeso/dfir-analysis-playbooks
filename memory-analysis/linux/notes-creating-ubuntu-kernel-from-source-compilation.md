@@ -31,6 +31,7 @@ Description: info on how to capture symbols
 # could be done for other targets
 git clone git://kernel.ubuntu.com/ubuntu/ubuntu-$(lsb_release -cs).git
 cd ubuntu-$(lsb_release -cs)
+cp BASE_KERNEL_CONFIG .config
 chmod a+x debian/rules
 chmod a+x debian/scripts/*
 chmod a+x debian/scripts/misc/*

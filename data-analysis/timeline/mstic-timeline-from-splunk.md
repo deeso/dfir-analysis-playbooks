@@ -55,6 +55,7 @@ sourcetype = "SET_SOURCE_TYPE"
 output_html = "SET_OUTPUT_HTML"
 columns_of_interest = ["SET_COLUMNS_OF_INTEREST"]
 
+# load the data
 data = [json.loads(i) for i in open(input_file).readlines()]
 
 # set the time field to TimeGenerated in the input dictionary
@@ -69,10 +70,12 @@ for d in data:
         items.append(r)
 
 df = pd.DataFrame([i for i in items if i['sourcetype'] in sourcetype])
+
+# large datasets with duplication will consume RAM, ease system contention here
 del data
 del items
 
-events_df = df[df.sourcetype.isin([sourcetype])].dropna(axis=1, how='all', inplace=True)
+events_df = df[df.sourcetype.isin([sourcetype])].dropna(axis=1, how='all')
 fig = nbdisplay.display_timeline(data=events_df, time_column="TimeGenerated", source_columns=columns_of_interest) 
 output_file(output_html)
 show(fig)

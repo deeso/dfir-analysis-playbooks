@@ -2,7 +2,7 @@
 ### Overview
 
 Task: Perform Timeline Event Analysis with MSTIC using Splunk Logs
-Description: Use Microsoft Threat Intelligence Python (msticpy) Library to create an interactive timeline
+Description: Use Microsoft Threat Intelligence Python (msticpy) Library to create an interactive timeline, see https://msticpy.readthedocs.io/en/latest/visualization/EventTimeline.html#plotting-a-simple-timeline
 
 ### Requirements
 1. Install msticpy, Jupyter Lab and IPython

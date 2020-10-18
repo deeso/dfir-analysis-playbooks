@@ -71,7 +71,7 @@ def build_memory_map(map_file):
 
 def write_data(vaddr, offset, size, output_dir, data_buffer):
     data = data_buffer[offset:offset+size]
-    output = os.path.join(output_dir, "0x{:08x}-0x{:08x}.bin".format(vaddr, vaddr+offset))
+    output = os.path.join(output_dir, "0x{:08x}-0x{:08x}.bin".format(vaddr, vaddr+size))
     open(output, 'wb').write(data)
 
 

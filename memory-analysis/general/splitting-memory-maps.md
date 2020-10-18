@@ -31,22 +31,45 @@ MAP_FILENAME = "pid.{}.map".format(PID)
 DMP_FILENAME = "pid.{}.dmp".format(PID)
 
 
-def build_memory_map(map_file):
+def read_map_file_entries(map_file):
     lines = open(map_file).readlines()
     mappings = [i.strip().split() for i in lines[4:]]
+    current_offset = 0
+    entries = []
+    
+    for ele in mappings:
+        ele = [int(i.replace('0x', ''), 16) for i in ele[:4]]
+        vaddr, paddr, sz, dumpoffset = ele
+        
+        entries.append({
+            'paddr': paddr, 'vaddr': vaddr, 'size':sz, 
+            'offset':current_offset, 'dumpoffset':dumpoffset
+        })
+        current_offset += sz
+    return entries
+
+
+def build_memory_map(map_file):
+    entries = read_map_file_entries(map_file)
 
     last = 0
     next = None
     mmaps = {}
     current = None
     last = None
-    for ele in mappings:
-        ele = [int(i.replace('0x', ''), 16) for i in ele[:4]]
-        vaddr, paddr, sz, dumpoffset = ele
+    
+    for ele in entries:
+        vaddr = ele.get('vaddr')
+        poffset = ele.get('offset')
+        sz = ele.get('size')
+
         prot = 0
         if next is None:
             next = vaddr + sz
-            mmaps[vaddr] = {'vaddr': vaddr, 'size':sz, 'offset':[(dumpoffset, sz)], 
+            mmaps[vaddr] = {'vaddr': vaddr, 'size':sz, 
+                            "current_offset": poffset,
+                            'entries': [ele],
+                            # 'offset':[(dumpoffset, sz)], 
                             'vaddr_order':[vaddr], 'vaddr_size': {vaddr:sz},
                             'prot': prot}
             current = vaddr
@@ -57,21 +80,26 @@ def build_memory_map(map_file):
             next = vaddr + sz
             current = vaddr
             last = vaddr
-            mmaps[vaddr] = {'vaddr': vaddr, 'size':sz, 'offset':[(dumpoffset, sz)], 
+            mmaps[vaddr] = {'vaddr': vaddr, 'size':sz, 
+                            "current_offset": poffset,
+                            'entries': [ele],
+                            # 'offset':[(dumpoffset, sz)], 
                             'vaddr_order':[vaddr], 'vaddr_size': {vaddr:sz},
                             'prot': prot}
 
         next = vaddr + sz
+
+
         mmaps[current]['size'] += sz
-        mmaps[current]['offset'].append((dumpoffset, sz))
-        mmaps[current]['vaddr_size'][vaddr] = sz
+        mmaps[current]['entries'].append(ele)
+        # mmaps[current]['offset'].append((dumpoffset, sz))
+        # mmaps[current]['vaddr_size'][vaddr] = sz
         mmaps[current]['vaddr_order'].append(vaddr)
     return mmaps
 
-
 def write_data(vaddr, offset, size, output_dir, data_buffer):
     data = data_buffer[offset:offset+size]
-    output = os.path.join(output_dir, "0x{:08x}-0x{:08x}.bin".format(vaddr, vaddr+size))
+    output = os.path.join(output_dir, "0x{:08x}-0x{:08x}.bin".format(vaddr, vaddr+offset))
     open(output, 'wb').write(data)
 
 
@@ -95,12 +123,12 @@ base_addr = addrs[0]
 args = []
 true_offset  = 0
 for vaddr in addrs:
-
     mmap = mmaps[vaddr]
     # vaddr, offset, size, output_dir, data_buffer
+    
     e = [
       vaddr, 
-      true_offset, 
+      mmap['current_offset'], 
       mmap['size'],
       output_dir,
       dmp 
@@ -112,6 +140,4 @@ for vaddr in addrs:
 pool = Pool(processes=NUM_PROCS)
 r = pool.map_async(mp_write_data, args)
 r.wait()
-
-
 ```

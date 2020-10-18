@@ -71,7 +71,7 @@ def build_memory_map(map_file):
 
 def write_data(vaddr, offset, size, output_dir, data_buffer):
     data = data_buffer[offset:offset+size]
-    output = os.path.join(output_dir, "0x{:08}-0x{:08}.bin".format(vaddr, vaddr+offset))
+    output = os.path.join(output_dir, "0x{:08x}-0x{:08x}.bin".format(vaddr, vaddr+offset))
     open(output, 'wb').write(data)
 
 
@@ -93,16 +93,19 @@ base_addr = addrs[0]
 
 # build the arguments for the multiprocessing
 args = []
+true_offset  = 0
 for vaddr in addrs:
+
     mmap = mmaps[vaddr]
     # vaddr, offset, size, output_dir, data_buffer
     e = [
       vaddr, 
-      vaddr-base_addr, 
+      true_offset, 
       mmap['size'],
       output_dir,
       dmp 
     ]
+    true_offset += mmap['size']
     args.append(e)
 
 # create pool to parallelize the effort

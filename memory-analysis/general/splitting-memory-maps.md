@@ -23,13 +23,15 @@ Description: Create separate files for each contiguous memory segment in a proce
 
 Python script to perform the carving
 ```
-OUTPUT_DIR = 'memory_segments'
 PID = 'PID'
+OUTPUT_DIR = 'memory_segments'
 NUM_PROCS = 8
 # assuming the following format for dumped process and map
 MAP_FILENAME = "pid.{}.map".format(PID)
 DMP_FILENAME = "pid.{}.dmp".format(PID)
 
+import os
+from multiprocessing import Pool
 
 def read_map_file_entries(map_file):
     lines = open(map_file).readlines()
@@ -38,7 +40,7 @@ def read_map_file_entries(map_file):
     entries = []
     
     for ele in mappings:
-        ele = [int(i.replace('0x', ''), 16) for i in ele[:4]]
+        ele = [int(i, 16) for i in ele[:4]]
         vaddr, paddr, sz, dumpoffset = ele
         
         entries.append({
@@ -124,13 +126,13 @@ args = []
 true_offset  = 0
 for vaddr in addrs:
     mmap = mmaps[vaddr]
-    # vaddr, offset, size, output_dir, data_buffer
+    # vaddr, offset, size, OUTPUT_DIR, data_buffer
     
     e = [
       vaddr, 
       mmap['current_offset'], 
       mmap['size'],
-      output_dir,
+      OUTPUT_DIR,
       dmp 
     ]
     true_offset += mmap['size']
@@ -140,4 +142,5 @@ for vaddr in addrs:
 pool = Pool(processes=NUM_PROCS)
 r = pool.map_async(mp_write_data, args)
 r.wait()
+pool.terminate()
 ```

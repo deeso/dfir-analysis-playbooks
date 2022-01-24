@@ -38,6 +38,7 @@ Understand the context.  Remember to collect the *who*, *what*, *when* and *wher
 
 7. capture traffic to a file
     1. `tcpdump -i [INTEFACE] -w [FILENAME] -vvvv`
+    2. **use extended berkley packet filters (ebpf) for container traffic analysis**
 
 8. Kernel modules loaded, etc.
     1. **list modules:** `lsmod`
@@ -57,4 +58,11 @@ Understand the context.  Remember to collect the *who*, *what*, *when* and *wher
 
 10. Capture all the server and application logs in `/var/log`
 11. Enumerate files that have been out or that are unexpected with `find`
+12. Handling Docker Containers (**see [Container Forensics with Docker Explorer](https://osdfir.blogspot.com/2021/01/container-forensics-with-docker-explorer.html) for a good case study**)
+    1. **obtain an acquisition of where the containers ran (or do it on the host machine)**
+    2. **download and install docker explorer**: [Docker Explorer](https://github.com/google/docker-explorer)
+    3. **identify container of interest**
+    4. **analyze container logs**
+    5. **mount and analyze the container filesystem**
+    6. **review the container history**
 
